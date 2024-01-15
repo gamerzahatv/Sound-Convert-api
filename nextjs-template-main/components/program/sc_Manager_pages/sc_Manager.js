@@ -6,7 +6,7 @@ import axios from 'axios';
 import { UploadModel } from "./sc_upload_content";
 import { Upload_music } from "./sc_upload_content";
 import { Sound_view } from "./sc_crud_manage";
-
+import { Apptest } from "./sc_crud_manage";
 
 
 
@@ -44,8 +44,7 @@ function SC_Manager({ closeSC_Manager, isMobile }) {
           <h2>Mange </h2>
           <UploadModel/>           
           <Upload_music/>
-          <Sound_view/> 
-         
+          <Sound_view/>
         </S.textModal>
       </S.layoutMainContent>
     </S.layoutMain>

@@ -1,77 +1,128 @@
-import useSWR from "swr";
-import { useState } from "react";
-import { Renamemodal } from "./modal/renamemodal";
-import { Deletemodal } from "./modal/deletemodal";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import {Button} from "@react95/core";
+import Swal from 'sweetalert2'
 
 export function Sound_view() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pagecount, setpagecount] = useState(1);
+  const [data, setData] = useState({ count: 0, results: [] })
+  const [currentPage, setcurrentPage] = useState(1)
+  const itemsPerPage = 5
+  const { count, results } = data
 
-  const { data, error } = useSWR(
-    `http://localhost:5000/employees?start=${currentPage}&limit=5`,
-    (url) => fetch(url).then((res) => res.json())
-  );
-  //const { data } = await res.json()
-  //console.log(data)
 
-  if (error) return <div>Failed to load</div>;
-  if (!data) return <div>Loading...</div>;
+  useEffect(() => {
+    console.log(currentPage)
+    const fetchDataWithInterval = () => {
+      if (currentPage <= 1) {
+        setcurrentPage(1)
+        fetchData(currentPage)
+      }else{
+        fetchData(currentPage)
+      }
+      
+    }
+  
 
-  const handleButtonClick = (id) => {
-    console.log(id)
-  }
+  
+    // Initial fetch
+    fetchDataWithInterval();
+  
+    // Set up interval
+    const intervalId = setInterval(fetchDataWithInterval,2500); // Replace 5000 with your desired interval in milliseconds
+  
+    // Clean up interval on component unmount or when currentPage changes
+    return () => clearInterval(intervalId)
+  
+  }, [currentPage])
+  
+
+  const fetchData = async (start) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/manage-sound/view?start=${start}&limit=${itemsPerPage}`);
+      setData(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  };
 
   const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 5);
-    setpagecount(pagecount + 1);
-
-  };
+    const start = currentPage + itemsPerPage
+    setcurrentPage(start)
+    fetchData(start)
+  }
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 5);
-    }
-    setpagecount(pagecount -1);
+    const start = currentPage - itemsPerPage
+    setcurrentPage(start)
+    fetchData(start)
+  }
 
-  };
+
+  const Deletefunc = (value,len) => {
+    // console.log(len)
+    axios.delete(`http://localhost:5000/manage-sound/del?filename=${value}`)
+    .then(response => {
+      Swal.fire({
+        title: 'Loading...',
+        html: 'Please wait while we process your request.',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        didOpen: () => {
+          // This function will be called when the modal is opened
+          try{
+            if ((len+4)%5 === 0){
+              setcurrentPage(currentPage-5)
+            }
+            setTimeout(() => {
+      
+              Swal.close(); // Close the loading popup after your task is done
+              
+            }, 3000); // Adjust the timeout as needed
+            
+          }catch (error) {
+            console.error(error)
+          }
+        },
+      });
+    })
+    .catch(error => {
+      console.error(error);
+      fetchData(1)
+    });
+  
+  }
 
   return (
-    <>
-      <div>
-        <h1>Table CRUD SOUND</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Text</th>
-              <th>Action</th>
+    <div>
+      <h1>Table CRUD SOUND</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Text</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {results.map((item) => (
+            <tr key={item.id}>
+              <td>{item.id}</td>
+              <td>{item.text}</td>
+              <td>
+                <Button >Rename</Button>
+                <Button onClick={() => Deletefunc(item.text,item.id)}>Delete</Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {data.results.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.text}</td>
-                <td>
-                  <Renamemodal value={item.text}/>
-                  <Deletemodal value={item.text}/>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div>
-          <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-            Previous
-          </button>
-          <span> page {pagecount} of {Math.ceil(data.count / 5)} </span>
-          <button onClick={handleNextPage} disabled={pagecount * 5 >= data.count}>
-            Next
-          </button>
-        </div>
+          ))}
+        </tbody>
+      </table>
+      <div>
+        <button onClick={handlePreviousPage} disabled={currentPage <= 1}>Previous</button>
+       
+        <button onClick={handleNextPage} disabled={currentPage + itemsPerPage > count}>Next</button>
       </div>
-    </>
+    </div>
   );
-};
-
-
+}
