@@ -11,7 +11,7 @@ export function Sound_view() {
 
 
   useEffect(() => {
-    console.log(currentPage)
+    //console.log(currentPage)
     const fetchDataWithInterval = () => {
       if (currentPage <= 1) {
         setcurrentPage(1)
@@ -94,6 +94,47 @@ export function Sound_view() {
   
   }
 
+  const Renamefunc = (oldfile) => {
+    Swal.fire({
+      title: "Submit your Renamefile",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off"
+      },
+      showCancelButton: true,
+      confirmButtonText: "Look up",
+      showLoaderOnConfirm: true,
+      preConfirm: async (newfile) => {
+        try {
+          axios.put(`http://localhost:5000/manage-sound/rename?oldfile=${oldfile}&newfile=${newfile}`)
+          .then(response => {
+            //console.log(response.data.status)
+            if (response.data.status){
+              Swal.fire({
+                icon: "success",
+                title: "Your work has been saved",
+                showConfirmButton: false,
+                timer: 1500
+              });
+            }else{
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+              });
+            }
+          });
+        } catch (error) {
+          Swal.showValidationMessage(`
+            Request failed: ${error}
+          `);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    });
+  };
+  
+
   return (
     <div>
       <h1>Table CRUD SOUND</h1>
@@ -111,7 +152,7 @@ export function Sound_view() {
               <td>{item.id}</td>
               <td>{item.text}</td>
               <td>
-                <Button >Rename</Button>
+                <Button onClick={() => Renamefunc(item.text)} >Rename</Button>
                 <Button onClick={() => Deletefunc(item.text,item.id)}>Delete</Button>
               </td>
             </tr>

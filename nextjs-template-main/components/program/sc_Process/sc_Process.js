@@ -9,7 +9,7 @@ import {
   Range,
 } from "@react95/core";
 import { Awfxcg321303 } from "@react95/icons";
-import * as S from "../layoutStyling";
+import * as S from "../../layoutStyling";
 import { marginTop } from "@xstyled/styled-components";
 
 function Yourmodel() {

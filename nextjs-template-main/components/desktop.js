@@ -21,8 +21,8 @@ import {
 import Portfolio from "./program/portfolio";
 import CV from "./program/cv"
 import Tunes from "./program/tunes";
-import SC_Manager  from "./program/sc_Manager_pages/sc_Manager";
-import SC_Process from "./program/sc_Process";
+import SC_Manager  from "./program/sc_Manager/sc_Manager";
+import SC_Process from "./program/sc_Process/sc_Process";
 
 function Desktop() {
   /* Mobile detection */
