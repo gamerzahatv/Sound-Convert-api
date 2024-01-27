@@ -3,9 +3,15 @@ from flask_restful import Resource, Api
 from werkzeug.utils import secure_filename
 import os
 from flask_cors import CORS
+import logging
+import shutil
+
+
 sound_path = 'music'
 model_path = 'weight'
 extensions_sound = ['.mp3', '.wav']
+ 
+
 
 def get_paginated_list(results, url, start, limit):
     start = int(start)
@@ -37,10 +43,11 @@ def get_paginated_list(results, url, start, limit):
     return obj
 
 # Get the list of all files in the folder
-def check_file_exist(file_name):
+def check_file_exist(file_name,path):
     try:
         # List all files in the directory
-        files = os.listdir(sound_path)
+        files = os.listdir(path)
+        print(files)
 
         # Check if the file with the specified name exists
         file_exists = any(file.lower() == file_name.lower() for file in files)
@@ -101,7 +108,8 @@ def check_model_path(modelname):
         print('model not exist')
         os.mkdir(os.path.join(model_path,modelname))
         return 'T'
-     
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 app = Flask(__name__)
 api = Api(app)
 CORS(app)
@@ -124,7 +132,7 @@ def get_sound():
 def delete_sound():
     try:
         test = request.args.get("filename", default="", type=str)
-        if check_file_exist(test) == "True":
+        if check_file_exist(test,sound_path) == "True":
             return delfile(os.path.join(sound_path, test))
     except Exception as error:
         app.logger.error("Error ", error)
@@ -135,7 +143,7 @@ def rename_sound():
     try:
         oldfile = request.args.get("oldfile", default="", type=str)
         newfile = request.args.get("newfile", default="", type=str)
-        if check_file_exist(oldfile) == "True":
+        if check_file_exist(oldfile,sound_path) == "True":
             return  renamefile_func(oldfile,newfile,sound_path)
         else: 
             return f'error'
@@ -208,27 +216,36 @@ def uploadfile_model():
 def get_model():
     modelpath_files = os.listdir(model_path)
     model_file = os.listdir(model_path)
+    counter = 1
     model_structure = []
     for root, dirs, files in os.walk(model_path):
         folder_path = os.path.relpath(root, model_path)
-        folder_info = {'folder_name': folder_path, 'files': []}
+        # folder_info = {'folder_name': folder_path, 'files': []}
+
+        # Check if the files list is empty
+        if not files:
+            continue
+        folder_info = {'model_name': folder_path, 'files': []}
+
+        # Add a unique number to the folder_info dictionary
+        folder_info['unique_number'] = counter
+        counter += 1
 
     # Collect information about files inside the folder
         for file in files:
             if file.lower().endswith(('.pth', '.index')):
                 file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(file_path, model_path)
-                print(relative_path)
-                folder_info['files'].append({'file_id': len(folder_info['files']) + 1, 'file_name': relative_path})
+                
+                file_info = {
+                    'file_count': len(folder_info['files']) + 1,
+                    'file_name': relative_path,
+                    # Add more fields as needed
+                }
+                folder_info['files'].append(file_info)
 
     # Add the folder information to the model_structure
         model_structure.append(folder_info)
-
-    # Print the collected information
-    # for folder_info in model_structure:
-    #     print(f"Folder: {folder_info['folder_name']}")
-    #     for file_info in folder_info['files']:
-    #         print(f"  File ID: {file_info['file_id']}, File Name: {file_info['file_name']}")
 
     return jsonify(get_paginated_list(
     model_structure
@@ -236,27 +253,38 @@ def get_model():
     , start=request.args.get('start')
     , limit=request.args.get('limit')
     ))
-    #return jsonify(model_structure)
 
+@app.route("/manage-model/rename", methods=['PUT'])
+def rename_model():
+    try:
+        oldfile = request.args.get("oldfile", default="", type=str)
+        newfile = request.args.get("newfile", default="", type=str)
+        #os.rename(oldfile, newfile)
+        os.rename(os.path.join(model_path,oldfile),os.path.join(model_path,newfile))
+        data = {
+            'status':'rename',
+            'oldfilename':oldfile,
+            'newfilename':newfile
+        }
+        return data
+    except Exception as error:
+        app.logger.error("Error ", error)
+        return 'Error'
 
-
+@app.route("/manage-model/del", methods=['DELETE'])
+def delete_model():
+    try:
+        file = request.args.get("filename", default="", type=str)
+        shutil.rmtree(os.path.join(model_path, file))
+        data = {
+            'status':'Delete MODEL',
+            'modelname':file,
+        }
+        return data
+    except Exception as error:
+        app.logger.error("Error ", error)
+        return 'Error'
     
-
-    
-
-
-    #     return jsonify(get_paginated_list(
-    # sound_files, 
-    # '/manage-sound/view', 
-    # start=request.args.get('start'), 
-    # limit=request.args.get('limit')
-    # ))
-    
-
-    
-
-
-
 if __name__ == "__main__":
     app.run(host='192.168.1.38', debug=True)
 

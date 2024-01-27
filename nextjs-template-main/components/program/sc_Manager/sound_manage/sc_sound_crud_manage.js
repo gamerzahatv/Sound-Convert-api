@@ -142,7 +142,7 @@ export function Sound_view() {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Text</th>
+            <th>Sound</th>
             <th>Action</th>
           </tr>
         </thead>
