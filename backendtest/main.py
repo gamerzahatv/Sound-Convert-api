@@ -154,12 +154,10 @@ def rename_sound():
 @app.route('/manage-sound/upload', methods=['POST'])
 def uploadfile_sound():
     file = request.files['audioFile']
-    #filename = request.args.get("oldfile", default="", type=str)
     # Set the maximum file size (70MB in this example)
     MAX_FILE_SIZE = 70 * 1024 * 1024  # Set to 70 MB
 
-    # Get the file name and extension
-    #filename, filename_extension = os.path.splitext(oldfile)
+    
 
     if 'audioFile' not in request.files:
         return 'No file part',406
@@ -180,37 +178,71 @@ def uploadfile_sound():
 
 ################################### END SOUND MANAGE ##########################
     
-@app.route('/manage-model/upload', methods=['POST'])
-def uploadfile_model():
-    model_name = request.args.get("modelname", default="", type=str)
+@app.route('/manage-model/upload/not-index', methods=['POST'])
+def uploadfile_modelnotindex():
+    model_name = request.form.get("modelname")
     pth_file = request.files['pth']
-    index_file = request.files['index']
-    #pth_filename, pth_file_extension = os.path.splitext(pth_file.filename)
-    #index_filename, index_file_extension = os.path.splitext(index_file.filename)
-    if 'pth' not in request.files:
+    pthname, pth_extension = os.path.splitext(pth_file.filename)
+    print(pth_extension)
+    if not  pth_file: 
         return 'No file part',406
+    if not  model_name: 
+        return 'Please input model name',406
     
-    if 'index' not in request.files:
-        return 'No file part',406
-    
-    if check_model_path(model_name) == "T":
-        if not index_file :
+    if pth_extension.lower() in ['.pth'] :
+        if check_model_path(model_name) == "T":
             upload_func(200 * 1024 * 1024,pth_file,os.path.join(model_path,model_name))
             return {
-            'Status':'uploadmodel',
-            'ModelName' : model_name ,
-            'pth': pth_file.filename,
+                'Status':'upload model success',
+                'ModelName' : model_name ,
+                'pth': pthname+pth_extension,
             }
-        elif index_file:
-            upload_func(200 * 1024 * 1024,pth_file,os.path.join(model_path,model_name))
-            upload_func(200 * 1024 * 1024,index_file,os.path.join(model_path,model_name))
-            return { 'Status': 'uploadmodel',
-            'ModelName': model_name,
-            'pth': pth_file.filename,
-            'index': index_file.filename
+        else:
+            return {
+                'Status':'FAILED File exist',
+                'ModelName' : model_name ,
+                'pth': pthname+pth_extension,
             }
     else:
-        return 'model exist'
+        return {
+            'Status':'Invalid file',
+        }
+
+@app.route('/manage-model/upload/index', methods=['POST'])
+def uploadfile_modelindex():
+    model_name = request.form.get("modelname")
+    pth_file = request.files['pth']
+    index_file = request.files['index']
+
+    pthname, pth_extension = os.path.splitext(pth_file.filename)
+    indexname, index_extension = os.path.splitext(index_file.filename)
+
+    if 'pth' not in request.files:
+        return 'No file part',406
+    if 'index' not in request.files:
+        return 'No file part',406
+    if pth_extension.lower() in ['.pth'] and index_extension.lower() in ['.index']:
+        if check_model_path(model_name) == "T":
+            upload_func(200 * 1024 * 1024,pth_file,os.path.join(model_path,model_name))
+            upload_func(200 * 1024 * 1024,index_file,os.path.join(model_path,model_name))
+            return { 
+                'Status': 'upload model success',
+                'ModelName': model_name,
+                'pth': pthname+pth_extension,
+                'index':indexname+index_extension
+            }
+        else:
+            return { 
+                'Status': 'FAILED File exist',
+                'ModelName': model_name,
+                'pth': pthname+pth_extension,
+                'index':indexname+index_extension
+            }
+    else:
+        return { 
+            'Status':'Invalid file',
+        }
+
 
 @app.route('/manage-model/view', methods=['GET'])
 def get_model():
@@ -284,7 +316,8 @@ def delete_model():
     except Exception as error:
         app.logger.error("Error ", error)
         return 'Error'
-    
+
+
 if __name__ == "__main__":
     app.run(host='192.168.1.38', debug=True)
 

@@ -45,7 +45,6 @@ export function Upload_music(){
           //setSelectedFilemusic(null)
           onfilesubmitRef.current.value = null;
           alert('OK')
-          console.log(selectedFilemusic);
         } else {
           console.log('Unexpected status:', response.status);
         }

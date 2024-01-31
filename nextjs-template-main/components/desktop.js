@@ -22,7 +22,7 @@ import Portfolio from "./program/portfolio";
 import CV from "./program/cv"
 import Tunes from "./program/tunes";
 import SC_Manager  from "./program/sc_Manager/sc_Manager_Layout";
-import SC_Process from "./program/sc_Process/sc_Process";
+import SC_Process from "./program/sc_Process/sc_Process_Layout";
 
 function Desktop() {
   /* Mobile detection */
