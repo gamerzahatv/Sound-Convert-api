@@ -22,7 +22,7 @@ import Portfolio from "./program/portfolio";
 import CV from "./program/cv"
 import Tunes from "./program/tunes";
 import SC_Manager  from "./program/sc_Manager/sc_Manager_Layout";
-import SC_Process from "./program/sc_Process/sc_Process_Layout";
+import SC_Process_Layout from "./program/sc_Process/sc_Process_Layout";
 
 function Desktop() {
   /* Mobile detection */
@@ -444,7 +444,7 @@ function Desktop() {
           <Tunes items={items} closeTunes={closeTunes} />
         )}
         {SC_ManagerOpened && <SC_Manager  items={items} closeSC_Manager={closeSC_Manager}  />}
-        {SC_ProcessOpened && <SC_Process items={items} closeSC_Process={closeSC_Process}  />}
+        {SC_ProcessOpened && <SC_Process_Layout items={items} closeSC_Process={closeSC_Process}  />}
 
       </React.Fragment>
       </>
