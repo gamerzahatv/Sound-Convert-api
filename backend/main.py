@@ -5,10 +5,17 @@ import os
 from flask_cors import CORS
 import logging
 import shutil
+from lib_vc.process import cli_infer ,vc_single
 
 
-sound_path = 'music'
-model_path = 'weight'
+def create_sample_command(modelname:str,source_audio_path:str,output_file_name:str,feature_index_path:str,speaker_id:int,transposition:float,f0_method,crepe_hop_length:int,harvest_median_filter:int,resample:int,mix:float,feature_ratio:float,protection_amnt:float):  
+  # Create the command string using formatted string literals
+  command = f'"{modelname}" "{source_audio_path}" "{output_file_name}" "{feature_index_path}" {speaker_id} {transposition} "{f0_method}" {crepe_hop_length} {harvest_median_filter} {resample} {mix} {feature_ratio} {protection_amnt}'
+  
+  return command
+
+sound_path = 'audios'
+model_path = 'weights'
 extensions_sound = ['.mp3', '.wav']
  
 
@@ -317,6 +324,26 @@ def delete_model():
         app.logger.error("Error ", error)
         return 'Error'
 
+@app.route("/infer_process", methods=['GET'])
+def infer_process():
+    try:
+        modelname = request.form.get("modelname")
+        source_audio_path = request.form.get("source_audio_path")
+        output_file_name = request.form.get("output_file_name")
+        feature_index_path = request.form.get("feature_index_path")
+        speaker_id =speaker_id = request.form.get("speaker_id")
+        transposition = request.form.get("transposition")
+        f0_method = request.form.get("f0_method")
+        crepe_hop_length = request.form.get("crepe_hop_length")
+        harvest_median_filter = request.form.get("harvest_median_filter")
+        resample = request.form.get("resample")
+        mix = request.form.get("mix")
+        feature_ratio  = request.form.get("feature_ratio")
+        protection_amnt = request.form.get("protection_amnt")        
+        return cli_infer(create_sample_command(modelname,source_audio_path,output_file_name,feature_index_path,speaker_id,transposition,f0_method,crepe_hop_length,harvest_median_filter,resample,mix,feature_ratio,protection_amnt))        
+    except Exception as error:
+        app.logger.error("Error ", error)
+        return 'Error'
 
 if __name__ == "__main__":
     app.run(host='192.168.1.38', debug=True)

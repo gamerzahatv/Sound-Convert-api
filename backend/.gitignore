@@ -1,0 +1,7 @@
+#model  and sound file
+.mp3
+.wav
+.index
+rmvpe.pt
+hubert_base.pt
+__pycache__

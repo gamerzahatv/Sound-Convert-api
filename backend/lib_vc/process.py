@@ -263,7 +263,7 @@ def cli_infer(com):
     print("Mangio-RVC-Fork Infer-CLI: Starting the inference...")
     vc_data = get_vc(model_name)
     print(vc_data)
-    print("Mangio-RVC-Fork Infer-CLI: Performing inference...")
+    #print("Mangio-RVC-Fork Infer-CLI: Performing inference...")
     conversion_data = vc_single(
         speaker_id,
         source_audio_path,
@@ -273,7 +273,7 @@ def cli_infer(com):
         feature_index_path,
         feature_ratio,
         harvest_median_filter,
-        resample,#5
+        resample,
         mix,
         protection_amnt,
         crepe_hop_length,        
@@ -281,92 +281,10 @@ def cli_infer(com):
     if "Success." in conversion_data[0]:
         print("Mangio-RVC-Fork Infer-CLI: Inference succeeded. Writing to %s/%s..." % ('audio-outputs', output_file_name))
         wavfile.write('%s/%s' % ('audio-outputs', output_file_name), conversion_data[1][0], conversion_data[1][1])
-        #print("Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', output_file_name))
-        return "Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', output_file_name)
+        print("Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', output_file_name))
+        return 'True'
+        #return "Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', output_file_name)
     else:
         print("Mangio-RVC-Fork Infer-CLI: Inference failed. Here's the traceback: ")
         print(conversion_data[0])
 
-
-
-#vc_single(int(0),'./audios/someguy.mp3',float(12),None,'dio','./logs/serana700_e200_s7200\serana700_v2.index',float(0.0),int(0),int(50),float(0.0),float(0.0),int(10))
-# sample_command = '"serana700_e200_s7200.pth" "./audios/someguy.mp3" "output_audio.wav" "./logs/serana700_e200_s7200\serana700_v2.index" 0 12 "dio" 120 5  5 0.0  0.0 0.0'
-# nani = cli_infer(sample_command)         
-                
-# from flask import Flask,jsonify,request
-# from flask_ngrok2 import run_with_ngrok
-# import subprocess
-# from flask_cors import CORS
-
-
-#sample_command = '"serana/serana700_e200_s7200.pth" "./audios/someguy.mp3" "output_audio.wav" "./logs/serana700_e200_s7200\serana700_v2.index" 0 12 "dio" 120 5  5 0.0  0.0 0.0'
-#nani = cli_infer(sample_command) 
-#get_vc("serana/serana700_e200_s7200.pth")
-#get_vc([])
-
-# app = Flask(__name__)
-# cors = CORS(app)
-# '''Token ngrok '''
-# run_with_ngrok(app=app, auth_token="2TzDxTPxT4PsN12y1dTd4RAjz1A_4QQQ9bAUrJ1uS6kmmKnJ4")
-
-# ##################### MODULE #####################################
-# '''This is module for chat '''
-
-# def process_chat(getinstruction,getinput,getmodel_name):
-#   try :
-#     print('chat processing')
-
-#     return 'Error'
-#   except Exception as e:
-#     return  {"Error": e}
-
-
-
-
-# @app.route("/test", methods=["POST"])
-# def test():
-#   try:
-
-#       content_type = request.headers.get('Content-Type')
-#       if (content_type == 'application/json'):
-#         print('yes')
-#         json = request.json
-#         print(json)
-
-#         if (json):
-#           result = process_chat(json['instruction'], json['input'],json['model'])
-#           return {'output': result }
-#         else:
-#           return {'output': 'Error' }
-#   except Exception as e:
-#       print(e)
-#       return {
-#         "Error": e,
-#       }
-
-# @app.route("/nani", methods=["GET"])
-# def nani():
-#   try:
-
-#     content_type = request.headers.get('Content-Type')
-#     #sample_commands = "serana700_e200_s7200.pth output_audio.wav feature_index_path 1 0.5 f0_method 256 5 44100 0.8 1.0 0.2"
-#     sample_command = '"serana700_e200_s7200.pth" "./audios/someguy.mp3" "output_audio.wav" "./logs/serana700_e200_s7200\serana700_v2.index" 0 12 "pm" 120 5  5 0.0  0.0 0.0'
-
-#     nani = cli_infer(sample_command) 
-#     return {'output':  nani  }
-#     #   if (content_type == 'application/json'):
-#     #     print('yes')
-#     #     json = request.json
-#     #     print(json)
-
-#     #     if (json):
-#     #       result = process_chat(json['instruction'], json['input'],json['model'])
-#           #return {'output': result }
-#   except Exception as e:
-#       print(e)
-#       return {
-#         "Error": e,
-#       }
-
-# if __name__ == '__main__':
-#     app.run()
